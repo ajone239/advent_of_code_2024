@@ -21,11 +21,6 @@ fn main() -> Result<()> {
     for (i, mut report) in reports.into_iter().enumerate() {
         let errors = find_error_events(&report);
 
-        println!("{:?}", i);
-        println!("{:?}", report);
-        println!("{:?}", errors);
-        println!();
-
         let event_to_remove = match errors.len() {
             0 => {
                 safe_count += 1;
@@ -53,11 +48,6 @@ fn main() -> Result<()> {
             safe_count += 1;
             continue;
         }
-
-        println!("{:?}", report);
-        println!("{:?}", errors);
-        println!();
-        println!();
     }
 
     println!("{}", safe_count);

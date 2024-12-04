@@ -18,16 +18,15 @@ fn main() -> Result<()> {
     }
 
     let mut safe_count = 0;
-    for (i, mut report) in reports.into_iter().enumerate() {
+    for mut report in reports.into_iter() {
         let errors = find_error_events(&report);
 
-        let event_to_remove = match errors.len() {
-            0 => {
-                safe_count += 1;
-                continue;
-            }
-            len => errors[len - 1],
-        };
+        if 0 == errors.len() {
+            safe_count += 1;
+            continue;
+        }
+
+        let event_to_remove = errors[0];
 
         let val = report.remove(event_to_remove);
 

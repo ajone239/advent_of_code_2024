@@ -8,14 +8,32 @@ fn main() -> Result<()> {
 
     let input: String = stdin.lines().map(|l| l.unwrap()).collect();
 
-    let re = Regex::new(r"mul\((\d{1,3}),(\d{1,3})\)")?;
+    let re = Regex::new(r"(do|don't|mul)\(((\d{1,3}),(\d{1,3}))?\)")?;
 
     let matches = re.captures_iter(&input);
 
+    let mut enable = true;
     let mut commands = vec![];
+
     for m in matches {
-        let left: u32 = m[1].parse()?;
-        let right: u32 = m[2].parse()?;
+        match &m[1] {
+            "do" => {
+                enable = true;
+                continue;
+            }
+            "don't" => {
+                enable = false;
+                continue;
+            }
+            _ => (),
+        }
+
+        if !enable {
+            continue;
+        }
+
+        let left: u32 = m[3].parse()?;
+        let right: u32 = m[4].parse()?;
 
         let command = MulCommand { left, right };
         commands.push(command);

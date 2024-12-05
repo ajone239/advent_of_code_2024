@@ -17,12 +17,19 @@ fn main() -> Result<()> {
 
     /* The shape of the mask made in our checks
      *
-     *     ****
-     *    ***
-     *   * * *
-     *  *  *  *
+     *  *
+     *   *
+     *    *
      */
-    let directions = [(0, 1), (1, 0), (-1, 1), (1, 1)];
+    let criss = [(-1, -1), (0, 0), (1, 1)];
+
+    /* The shape of the mask made in our checks
+     *
+     *    *
+     *   *
+     *  *
+     */
+    let cross = [(-1, 1), (0, 0), (1, -1)];
 
     let cross_word = CrossWord::new(puzzle);
 
@@ -30,20 +37,27 @@ fn main() -> Result<()> {
 
     for i in 0..cross_word.length {
         for j in 0..cross_word.width {
-            for dir in directions {
-                let i = i as isize;
-                let j = j as isize;
+            let i = i as isize;
+            let j = j as isize;
 
-                let word: String = (0..4)
-                    .map(|k| (i + k * dir.0, j + k * dir.1))
+            // Could be an local function tho
+            let dir_to_word = |dirs: &[(isize, isize)]| -> String {
+                dirs.iter()
+                    .map(|dir| (i + dir.0, j + dir.1))
                     .map(|(i, j)| cross_word.bounded_at(i, j))
                     .filter(|c| c.is_some())
                     .map(|c| c.unwrap())
-                    .collect();
+                    .collect()
+            };
 
-                if word == "XMAS" || word == "SAMX" {
-                    count += 1;
-                }
+            let word_criss: String = dir_to_word(&criss);
+
+            let word_cross: String = dir_to_word(&cross);
+
+            if (word_cross == "MAS" || word_cross == "SAM")
+                && (word_criss == "MAS" || word_criss == "SAM")
+            {
+                count += 1;
             }
         }
     }

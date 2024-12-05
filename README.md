@@ -13,5 +13,8 @@ A brief description of each day:
     + Day 2b: report validation with one bad allowed
 - Day 3:
     + Day 3a: script evaluation of multiplications
-    + Day 3b:
+    + Day 3b: script evaluation w/ dis/enable
+- Day 4:
+    + Day 4a: word search
+    + Day 4b: word search cross
 

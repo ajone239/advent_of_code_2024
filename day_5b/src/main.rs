@@ -1,84 +1,144 @@
-use std::io;
+use std::{
+    collections::{HashMap, HashSet},
+    io, usize,
+};
 
 use anyhow::Result;
 
 fn main() -> Result<()> {
     let stdin = io::stdin();
 
-    let mut puzzle: Vec<Vec<char>> = vec![];
+    let mut orderings: Vec<String> = vec![];
+    let mut updates: Vec<String> = vec![];
 
+    let mut oou = true;
     for line in stdin.lines() {
         let line = line?;
 
-        let row = line.chars().collect();
+        if line.is_empty() {
+            oou = false;
+            continue;
+        }
 
-        puzzle.push(row);
-    }
-
-    /* The shape of the mask made in our checks
-     *
-     *     ****
-     *    ***
-     *   * * *
-     *  *  *  *
-     */
-    let directions = [(0, 1), (1, 0), (-1, 1), (1, 1)];
-
-    let cross_word = CrossWord::new(puzzle);
-
-    let mut count = 0;
-
-    for i in 0..cross_word.length {
-        for j in 0..cross_word.width {
-            for dir in directions {
-                let i = i as isize;
-                let j = j as isize;
-
-                let word: String = (0..4)
-                    .map(|k| (i + k * dir.0, j + k * dir.1))
-                    .map(|(i, j)| cross_word.bounded_at(i, j))
-                    .filter(|c| c.is_some())
-                    .map(|c| c.unwrap())
-                    .collect();
-
-                if word == "XMAS" || word == "SAMX" {
-                    count += 1;
-                }
-            }
+        if oou {
+            orderings.push(line);
+        } else {
+            updates.push(line)
         }
     }
 
-    println!("{}", count);
+    let orderings: Vec<(usize, usize)> = orderings
+        .into_iter()
+        .map(|s| {
+            s.split('|')
+                .map(|sp| sp.parse::<usize>().unwrap())
+                .collect()
+        })
+        .map(|i: Vec<usize>| (i[0], i[1]))
+        .collect();
+
+    let updates: Vec<Vec<usize>> = updates
+        .into_iter()
+        .map(|s| {
+            s.split(',')
+                .map(|sp| sp.parse::<usize>().unwrap())
+                .collect()
+        })
+        .collect();
+
+    let mut orderings_map: HashMap<usize, PageOrdering> = HashMap::new();
+
+    for ordering in &orderings {
+        let page_before = ordering.0;
+        let page_after = ordering.1;
+
+        orderings_map
+            .entry(page_before)
+            .or_default()
+            .after
+            .insert(page_after);
+        orderings_map
+            .entry(page_after)
+            .or_default()
+            .before
+            .insert(page_before);
+    }
+
+    let fixed_updates: Vec<Vec<usize>> = updates
+        .into_iter()
+        .filter(|update| !check_update(&update, &orderings_map))
+        .map(|update| reorder_pages(&update, &orderings_map))
+        .collect();
+
+    let result: usize = fixed_updates.into_iter().map(|update| update[update.len()/2]).sum();
+
+    println!("{}", result);
 
     Ok(())
 }
 
-struct CrossWord {
-    length: usize,
-    width: usize,
-    puzzle: Vec<Vec<char>>,
+#[derive(Default, Debug)]
+struct PageOrdering {
+    before: HashSet<usize>,
+    after: HashSet<usize>,
 }
 
-impl CrossWord {
-    fn new(puzzle: Vec<Vec<char>>) -> Self {
-        let length = puzzle.len();
-        let width = puzzle[0].len();
+fn check_update(update: &Vec<usize>, orderings_map: &HashMap<usize, PageOrdering>) -> bool {
+    let mut seen = HashSet::new();
 
-        Self {
-            length,
-            width,
-            puzzle,
-        }
-    }
+    for page in update.iter() {
+        let Some(page_ordering) = orderings_map.get(page) else {
+            return false;
+        };
 
-    fn bounded_at(&self, i: isize, j: isize) -> Option<char> {
-        if i < 0 || j < 0 || i >= self.length as isize || j >= self.width as isize {
-            return None;
+        for value in seen.iter() {
+            if page_ordering.after.contains(value) {
+                return false;
+            }
         }
 
-        let i = i as usize;
-        let j = j as usize;
-
-        Some(self.puzzle[i][j])
+        seen.insert(*page);
     }
+
+    seen.clear();
+
+    for page in update.iter().rev() {
+        let Some(page_ordering) = orderings_map.get(&page) else {
+            return false;
+        };
+
+        for value in seen.iter() {
+            if page_ordering.before.contains(value) {
+                return false;
+            }
+        }
+
+        seen.insert(*page);
+    }
+
+    true
+}
+
+fn reorder_pages(update: &Vec<usize>, orderings_map: &HashMap<usize, PageOrdering>) -> Vec<usize> {
+    let mut new_update = vec![];
+
+    for page in update {
+        let mut i = 0;
+
+        let page_ordering = orderings_map.get(&page).unwrap();
+
+        while i < new_update.len() {
+            let new_page = new_update[i];
+
+            if page_ordering.after.contains(&new_page) {
+                break;
+            }
+
+            i += 1;
+        }
+
+        new_update.insert(i, *page);
+    }
+
+    new_update
 }

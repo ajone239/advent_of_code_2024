@@ -3,7 +3,7 @@ build:
 
 small: build
   @cat ./small_input | ../target/debug/day_5b
-  @echo "Should be 18"
+  @echo "Should be 123"
 
 test: build
   @cat ./input | ../target/debug/day_5b

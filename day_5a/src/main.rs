@@ -1,4 +1,7 @@
-use std::{collections::{HashMap, HashSet}, io, usize};
+use std::{
+    collections::{HashMap, HashSet},
+    io, usize,
+};
 
 use anyhow::Result;
 
@@ -49,11 +52,23 @@ fn main() -> Result<()> {
         let page_before = ordering.0;
         let page_after = ordering.1;
 
-        orderings_map.entry(page_before).or_default().after.insert(page_after);
-        orderings_map.entry(page_after).or_default().before.insert(page_before);
+        orderings_map
+            .entry(page_before)
+            .or_default()
+            .after
+            .insert(page_after);
+        orderings_map
+            .entry(page_after)
+            .or_default()
+            .before
+            .insert(page_before);
     }
 
-    let result: usize = updates.iter().filter(|update| check_update(&update, &orderings_map)).map(|update| update[update.len()/2]).sum();
+    let result: usize = updates
+        .iter()
+        .filter(|update| check_update(&update, &orderings_map))
+        .map(|update| update[update.len() / 2])
+        .sum();
 
     println!("{}", result);
     Ok(())

@@ -17,4 +17,6 @@ A brief description of each day:
 - Day 4:
     + Day 4a: word search
     + Day 4b: word search cross
-
+- Day 5:
+    + Day 5a: validate page order
+    + Day 5b: fix page order

@@ -70,7 +70,10 @@ fn main() -> Result<()> {
         .map(|update| reorder_pages(&update, &orderings_map))
         .collect();
 
-    let result: usize = fixed_updates.into_iter().map(|update| update[update.len()/2]).sum();
+    let result: usize = fixed_updates
+        .into_iter()
+        .map(|update| update[update.len() / 2])
+        .sum();
 
     println!("{}", result);
 
@@ -84,36 +87,25 @@ struct PageOrdering {
 }
 
 fn check_update(update: &Vec<usize>, orderings_map: &HashMap<usize, PageOrdering>) -> bool {
-    let mut seen = HashSet::new();
-
-    for page in update.iter() {
+    for (i, page) in update.iter().enumerate() {
         let Some(page_ordering) = orderings_map.get(page) else {
             return false;
         };
 
-        for value in seen.iter() {
+        let before = &update[..i];
+        let after = &update[i..];
+
+        for value in before {
             if page_ordering.after.contains(value) {
                 return false;
             }
         }
 
-        seen.insert(*page);
-    }
-
-    seen.clear();
-
-    for page in update.iter().rev() {
-        let Some(page_ordering) = orderings_map.get(&page) else {
-            return false;
-        };
-
-        for value in seen.iter() {
+        for value in after {
             if page_ordering.before.contains(value) {
                 return false;
             }
         }
-
-        seen.insert(*page);
     }
 
     true

@@ -25,12 +25,12 @@ fn main() -> Result<()> {
 
     let init_local = map.guard_location.clone();
 
-    let mut i = 0;
+    // let mut i = 0;
     while PathState::New == map.advance() {
-        // let mut blah = String::new();
-        // let _ = io::stdin().read_line(&mut blah);
-        i += 1;
-        println!("{}", i);
+        let mut blah = String::new();
+        let _ = io::stdin().read_line(&mut blah);
+        // i += 1;
+        // println!("{}", i);
     }
 
     println!("{:?}", map);
@@ -101,7 +101,9 @@ struct Map {
     height: usize,
     map: Vec<Vec<Square>>,
     guard_direction: Direction,
+    init_direction: Direction,
     guard_location: (usize, usize),
+    init_location: (usize, usize),
     seen: HashSet<(usize, usize, Direction)>,
     obstacles: HashSet<(usize, usize)>,
 }
@@ -144,6 +146,8 @@ impl Map {
             map: processed_map,
             guard_location,
             guard_direction,
+            init_location: guard_location,
+            init_direction: guard_direction,
             seen,
             obstacles,
         }
@@ -193,9 +197,8 @@ impl Map {
     }
 
     fn can_loop(&self, init_dir: Direction, new_x: usize, new_y: usize) -> bool {
-        let mut loop_dir = init_dir;
-        let mut new_x = new_x;
-        let mut new_y = new_y;
+        let mut loop_dir = self.init_direction;
+        let (mut new_x, mut new_y) = self.init_location;
         let mut next_x;
         let mut next_y;
 

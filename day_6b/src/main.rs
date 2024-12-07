@@ -184,7 +184,7 @@ impl Map {
 
         self.map[new_x][new_y] = Square::Wall;
 
-        if self.can_loop(self.guard_direction, old_x, old_y) {
+        if self.can_loop() {
             self.obstacles.insert((new_x, new_y));
         }
 
@@ -196,7 +196,7 @@ impl Map {
         PathState::New
     }
 
-    fn can_loop(&self, init_dir: Direction, new_x: usize, new_y: usize) -> bool {
+    fn can_loop(&self) -> bool {
         let mut loop_dir = self.init_direction;
         let (mut new_x, mut new_y) = self.init_location;
         let mut next_x;

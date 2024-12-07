@@ -1,5 +1,5 @@
 use std::{
-    collections::{hash_set, HashSet},
+    collections::HashSet,
     fmt::{Debug, Write},
     io,
 };
@@ -12,7 +12,7 @@ fn main() -> Result<()> {
     let mut lines: Vec<Vec<char>> = vec![];
 
     for line in stdin.lines() {
-        let line = line?;
+        let line = line?.trim().to_string();
 
         if line.is_empty() {
             break;
@@ -25,7 +25,10 @@ fn main() -> Result<()> {
 
     let init_local = map.guard_location.clone();
 
-    while PathState::New == map.advance() {}
+    while PathState::New == map.advance() {
+        // let mut blah = String::new();
+        // let _ = io::stdin().read_line(&mut blah);
+    }
 
     println!("{:?}", map);
 
@@ -80,7 +83,7 @@ enum Square {
 impl Debug for Square {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let disp = match self {
-            Self::Unvisited => ' ',
+            Self::Unvisited => '_',
             Self::Visited => 'X',
             Self::Wall => '#',
             Self::Guard => '@',
@@ -161,7 +164,6 @@ impl Map {
             new_y = (self.guard_location.1 as isize + dy) as usize;
 
             if new_x >= self.height || new_y >= self.width {
-                self.guard_direction = self.guard_direction.rotate_cw();
                 return PathState::Gone;
             }
 
@@ -201,7 +203,7 @@ impl Map {
             next_y = (new_y as isize + dy) as usize;
 
             if next_x >= self.height || next_y >= self.width {
-                break;
+                return false;
             }
 
             if self.map[next_x][next_y] == Square::Wall {
@@ -214,13 +216,11 @@ impl Map {
 
             if self.seen.contains(&new_tile) || !seen_internal.insert(new_tile) {
                 return true;
-            }
+            };
 
             new_x = next_x;
             new_y = next_y;
         }
-
-        false
     }
 }
 
@@ -228,14 +228,15 @@ impl Debug for Map {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "{:?}", self.guard_direction)?;
         writeln!(f, "{:?}", self.guard_location)?;
-        writeln!(f, "{:?}", self.seen)?;
+        writeln!(f, "{:?}", self.obstacles.len())?;
+        // writeln!(f, "{:?}", self.seen)?;
 
         for (i, row) in self.map.iter().enumerate() {
             for (j, cell) in row.iter().enumerate() {
                 if self.obstacles.contains(&(i, j)) {
-                    write!(f, " 0")?;
+                    write!(f, "0")?;
                 } else {
-                    write!(f, " {:?}", cell)?;
+                    write!(f, "{:?}", cell)?;
                 }
             }
             writeln!(f)?;

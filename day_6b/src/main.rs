@@ -25,9 +25,12 @@ fn main() -> Result<()> {
 
     let init_local = map.guard_location.clone();
 
+    let mut i = 0;
     while PathState::New == map.advance() {
         // let mut blah = String::new();
         // let _ = io::stdin().read_line(&mut blah);
+        i += 1;
+        println!("{}", i);
     }
 
     println!("{:?}", map);
@@ -83,7 +86,7 @@ enum Square {
 impl Debug for Square {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let disp = match self {
-            Self::Unvisited => '_',
+            Self::Unvisited => '.',
             Self::Visited => 'X',
             Self::Wall => '#',
             Self::Guard => '@',
@@ -175,12 +178,14 @@ impl Map {
             break;
         }
 
-        self.map[old_x][old_y] = Square::Visited;
-        self.map[new_x][new_y] = Square::Guard;
+        self.map[new_x][new_y] = Square::Wall;
 
         if self.can_loop(self.guard_direction, old_x, old_y) {
             self.obstacles.insert((new_x, new_y));
         }
+
+        self.map[old_x][old_y] = Square::Visited;
+        self.map[new_x][new_y] = Square::Guard;
 
         self.guard_location = (new_x, new_y);
 
@@ -188,7 +193,7 @@ impl Map {
     }
 
     fn can_loop(&self, init_dir: Direction, new_x: usize, new_y: usize) -> bool {
-        let mut loop_dir = init_dir.rotate_cw();
+        let mut loop_dir = init_dir;
         let mut new_x = new_x;
         let mut new_y = new_y;
         let mut next_x;
@@ -212,9 +217,9 @@ impl Map {
                 continue;
             }
 
-            let new_tile = (next_x, next_y, loop_dir);
+            let new_tile = (new_x, new_y, loop_dir);
 
-            if self.seen.contains(&new_tile) || !seen_internal.insert(new_tile) {
+            if !seen_internal.insert(new_tile) {
                 return true;
             };
 

@@ -1,5 +1,5 @@
 use std::{
-    collections::HashSet,
+    collections::{hash_set, HashSet},
     fmt::{Debug, Write},
     io,
 };
@@ -23,15 +23,14 @@ fn main() -> Result<()> {
 
     let mut map = Map::new(lines);
 
+    let init_local = map.guard_location.clone();
+
     while PathState::New == map.advance() {}
 
-    let mut count = 0;
-    for (x, y, dir) in map.seen.iter() {
-        if map.can_loop(*dir, *x, *y) {
-            count += 1;
-            println!("cool {count} {x} {y} {dir:?}");
-        }
-    }
+    println!("{:?}", map);
+
+    println!("{}", map.obstacles.contains(&init_local));
+    println!("can loop count: {}", map.obstacles.len());
 
     Ok(())
 }
@@ -98,6 +97,7 @@ struct Map {
     guard_direction: Direction,
     guard_location: (usize, usize),
     seen: HashSet<(usize, usize, Direction)>,
+    obstacles: HashSet<(usize, usize)>,
 }
 
 impl Map {
@@ -105,6 +105,7 @@ impl Map {
         let width = map[0].len();
         let height = map.len();
         let seen = HashSet::new();
+        let obstacles = HashSet::new();
 
         let mut processed_map = vec![vec![Square::Unvisited; map[0].len()]; map.len()];
         let mut guard_direction: Direction = Direction::North;
@@ -138,6 +139,7 @@ impl Map {
             guard_location,
             guard_direction,
             seen,
+            obstacles,
         }
     }
 
@@ -174,18 +176,23 @@ impl Map {
         self.map[old_x][old_y] = Square::Visited;
         self.map[new_x][new_y] = Square::Guard;
 
+        if self.can_loop(self.guard_direction, old_x, old_y) {
+            self.obstacles.insert((new_x, new_y));
+        }
+
         self.guard_location = (new_x, new_y);
 
         PathState::New
     }
 
-    fn can_loop(&self, loop_dir: Direction, new_x: usize, new_y: usize) -> bool {
-        let mut loop_dir = loop_dir.rotate_cw();
-
+    fn can_loop(&self, init_dir: Direction, new_x: usize, new_y: usize) -> bool {
+        let mut loop_dir = init_dir.rotate_cw();
         let mut new_x = new_x;
         let mut new_y = new_y;
         let mut next_x;
         let mut next_y;
+
+        let mut seen_internal = HashSet::new();
 
         loop {
             let (dx, dy) = loop_dir.to_delta();
@@ -198,12 +205,14 @@ impl Map {
             }
 
             if self.map[next_x][next_y] == Square::Wall {
-                break;
+                loop_dir = loop_dir.rotate_cw();
+
+                continue;
             }
 
             let new_tile = (next_x, next_y, loop_dir);
 
-            if self.seen.contains(&new_tile) {
+            if self.seen.contains(&new_tile) || !seen_internal.insert(new_tile) {
                 return true;
             }
 
@@ -221,8 +230,15 @@ impl Debug for Map {
         writeln!(f, "{:?}", self.guard_location)?;
         writeln!(f, "{:?}", self.seen)?;
 
-        for row in &self.map {
-            writeln!(f, "{:?}", row)?;
+        for (i, row) in self.map.iter().enumerate() {
+            for (j, cell) in row.iter().enumerate() {
+                if self.obstacles.contains(&(i, j)) {
+                    write!(f, " 0")?;
+                } else {
+                    write!(f, " {:?}", cell)?;
+                }
+            }
+            writeln!(f)?;
         }
 
         Ok(())

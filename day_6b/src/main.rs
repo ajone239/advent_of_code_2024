@@ -25,14 +25,13 @@ fn main() -> Result<()> {
 
     while PathState::New == map.advance() {}
 
-    let result = map
-        .map
-        .iter()
-        .flat_map(|row| row.iter())
-        .filter(|c| **c == Square::Visited || **c == Square::Guard)
-        .count();
-
-    println!("{}", result);
+    let mut count = 0;
+    for (x, y, dir) in map.seen.iter() {
+        if map.can_loop(*dir, *x, *y) {
+            count += 1;
+            println!("cool {count} {x} {y} {dir:?}");
+        }
+    }
 
     Ok(())
 }
@@ -40,7 +39,6 @@ fn main() -> Result<()> {
 #[derive(Hash, Eq, PartialEq, Copy, Clone, Debug)]
 enum PathState {
     New,
-    Looping,
     Gone,
 }
 
@@ -173,18 +171,47 @@ impl Map {
             break;
         }
 
-        let new_tile = (new_x, new_y, self.guard_direction);
-
-        if self.seen.contains(&new_tile) {
-            return PathState::Looping;
-        }
-
         self.map[old_x][old_y] = Square::Visited;
         self.map[new_x][new_y] = Square::Guard;
 
         self.guard_location = (new_x, new_y);
 
         PathState::New
+    }
+
+    fn can_loop(&self, loop_dir: Direction, new_x: usize, new_y: usize) -> bool {
+        let mut loop_dir = loop_dir.rotate_cw();
+
+        let mut new_x = new_x;
+        let mut new_y = new_y;
+        let mut next_x;
+        let mut next_y;
+
+        loop {
+            let (dx, dy) = loop_dir.to_delta();
+
+            next_x = (new_x as isize + dx) as usize;
+            next_y = (new_y as isize + dy) as usize;
+
+            if next_x >= self.height || next_y >= self.width {
+                break;
+            }
+
+            if self.map[next_x][next_y] == Square::Wall {
+                break;
+            }
+
+            let new_tile = (next_x, next_y, loop_dir);
+
+            if self.seen.contains(&new_tile) {
+                return true;
+            }
+
+            new_x = next_x;
+            new_y = next_y;
+        }
+
+        false
     }
 }
 

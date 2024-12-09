@@ -46,10 +46,11 @@ fn main() -> Result<()> {
         for i in 0..towers.len() - 1 {
             let start = &towers[i];
             for other in &towers[i + 1..] {
-                let (f, b) = start.project(other);
+                let nodes = start.project(other);
 
-                antinodes.insert(f);
-                antinodes.insert(b);
+                for n in nodes {
+                    antinodes.insert(n);
+                }
             }
         }
     }
@@ -71,19 +72,26 @@ struct Point {
 }
 
 impl Point {
-    fn project(&self, other: &Self) -> (Point, Point) {
+    fn project(&self, other: &Self) -> Vec<Point> {
         let x_diff = self.x - other.x;
         let y_diff = self.y - other.y;
 
-        let forward = Point {
-            x: self.x + x_diff,
-            y: self.y + y_diff,
-        };
-        let backward = Point {
-            x: other.x - x_diff,
-            y: other.y - y_diff,
-        };
+        let mut rv = vec![];
 
-        (forward, backward)
+        for i in 0..50 {
+            let forward = Point {
+                x: self.x + x_diff * i,
+                y: self.y + y_diff * i,
+            };
+            let backward = Point {
+                x: other.x - x_diff * i,
+                y: other.y - y_diff * i,
+            };
+
+            rv.push(forward);
+            rv.push(backward);
+        }
+
+        rv
     }
 }

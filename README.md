@@ -20,3 +20,15 @@ A brief description of each day:
 - Day 5:
     + Day 5a: validate page order
     + Day 5b: fix page order
+- Day 6:
+    + Day 6a: automata walking
+    + Day 6b: automata blocking
+- Day 7:
+    + Day 7a: equation solver
+    + Day 7b: equation solver with concat
+- Day 8:
+    + Day 8a: basic antinode finding
+    + Day 8b: harmonic antinode finding
+- Day 9:
+    + Day 9a: disk compactor
+    + Day 8b: disk compactor don't bust up files

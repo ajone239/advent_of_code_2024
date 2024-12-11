@@ -1,4 +1,4 @@
-use std::io;
+use std::{collections::HashSet, io};
 
 use anyhow::{Ok, Result};
 
@@ -38,8 +38,9 @@ fn main() -> Result<()> {
     let result: u32 = starts
         .into_iter()
         .map(|s| {
-            let score = score_trail_head(s, &map);
-            println!("{score} - {s:?}");
+            let mut summits = HashSet::new();
+            let score = score_trail_head(s, &map, &mut summits);
+            // summits.len() as u32
             score
         })
         .sum();
@@ -49,11 +50,16 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-fn score_trail_head(cell: (usize, usize), map: &Vec<Vec<u8>>) -> u32 {
+fn score_trail_head(
+    cell: (usize, usize),
+    map: &Vec<Vec<u8>>,
+    summits: &mut HashSet<(usize, usize)>,
+) -> u32 {
     let (i, j) = cell;
     let cell_value = map[i][j];
 
     if cell_value == 9 {
+        summits.insert(cell);
         return 1;
     }
 
@@ -75,9 +81,8 @@ fn score_trail_head(cell: (usize, usize), map: &Vec<Vec<u8>>) -> u32 {
             continue;
         }
 
-        sum += score_trail_head((new_i, new_j), map);
+        sum += score_trail_head((new_i, new_j), map, summits);
     }
 
-    println!("{:?} - {}", cell, sum);
     sum
 }

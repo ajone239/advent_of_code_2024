@@ -55,47 +55,35 @@ fn main() -> Result<()> {
         };
 
         while empty_block.length > 0 {
-            let Some(mut last_file_block) = file_blocks.pop() else {
-                break;
-            };
-
-            if empty_block.index >= last_file_block.index {
-                file_blocks.push(last_file_block);
-                break;
-            }
-
-            match (empty_block.length, last_file_block.length) {
-                (elen, flen) if elen >= flen => {
-                    let new_file_block = FileBlock {
-                        id: last_file_block.id,
-                        length: flen,
-                        index: empty_block.index,
-                    };
-
-                    new_file_blocks.push(new_file_block);
-
-                    empty_block.length -= flen;
-                    empty_block.index += flen;
-                }
-                (elen, flen) if elen < flen => {
-                    let new_file_block = FileBlock {
-                        id: last_file_block.id,
-                        length: elen,
-                        index: empty_block.index,
-                    };
-
+            for i in (0..file_blocks.len()).rev() {
+                let last_file_block = &mut file_blocks[i];
+                if last_file_block.index < empty_block.index {
                     empty_block.length = 0;
-
-                    last_file_block.length -= elen;
-
-                    file_blocks.push(last_file_block);
-                    new_file_blocks.push(new_file_block);
+                    break;
                 }
-                (_, _) => panic!(),
+
+                match (empty_block.length, last_file_block.length) {
+                    (elen, flen) if elen >= flen => {
+                        let new_file_block = FileBlock {
+                            id: last_file_block.id,
+                            length: flen,
+                            index: empty_block.index,
+                        };
+
+                        new_file_blocks.push(new_file_block);
+
+                        empty_block.length -= flen;
+                        empty_block.index += flen;
+
+                        file_blocks.remove(i);
+
+                        break;
+                    }
+                    (_, _) => (),
+                }
             }
         }
     }
-
     file_blocks.append(&mut new_file_blocks);
     file_blocks.sort_by(|s, o| s.index.cmp(&o.index));
 

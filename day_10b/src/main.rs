@@ -40,8 +40,8 @@ fn main() -> Result<()> {
         .map(|s| {
             let mut summits = HashSet::new();
             let score = score_trail_head(s, &map, &mut summits);
-            summits.len() as u32
-            // score
+            // summits.len() as u32
+            score
         })
         .sum();
 

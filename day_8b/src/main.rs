@@ -1,6 +1,6 @@
 use std::{
     collections::{HashMap, HashSet},
-    f64, io,
+    io,
 };
 
 use anyhow::{Ok, Result};

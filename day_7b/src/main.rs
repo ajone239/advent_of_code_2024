@@ -103,7 +103,7 @@ impl Iterator for AnyBaseDigits {
     fn next(&mut self) -> Option<Self::Item> {
         let mut i = 0;
         let rv = self.digits.clone();
-        loop {
+        while i < self.digits.len() {
             let digit = &mut self.digits[i];
             *digit += 1;
 

@@ -1,6 +1,6 @@
 use std::{
     collections::{HashMap, HashSet},
-    f64, io,
+    io,
 };
 
 use anyhow::{Ok, Result};
@@ -12,11 +12,6 @@ fn main() -> Result<()> {
 
     for line in stdin.lines() {
         let line = line?;
-
-        if line.is_empty() {
-            break;
-        }
-
         lines.push(line.chars().collect());
     }
 

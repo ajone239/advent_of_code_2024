@@ -15,7 +15,7 @@ fn main() -> Result<()> {
         .map(|s| s.parse().unwrap())
         .collect();
 
-    for i in 0..25 {
+    for i in 0..75 {
         stones = blink(stones);
         println!("{} - {}", i, stones.len());
     }
@@ -31,6 +31,7 @@ If the stone is engraved with a number that has an even number of digits, it is 
 
 If none of the other rules apply, the stone is replaced by a new stone; the old stone's number multiplied by 2024 is engraved on the new stone.
 */
+
 enum Whoops<T> {
     Single(T),
     Double(T, T),

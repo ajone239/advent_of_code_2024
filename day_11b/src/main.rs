@@ -39,16 +39,16 @@ enum Whoops<T> {
 
 fn blink(stone: u64, seen: &mut HashMap<(u64, usize), usize>, depth: usize) -> usize {
     if depth == 0 {
-        return 1
+        return 1;
     }
 
     if let Some(count) = seen.get(&(stone, depth)) {
         return *count;
     }
 
-    let stone_count =  match process_stone(stone) {
-        Whoops::Single(s) => blink(s, seen , depth - 1),
-        Whoops::Double(l,r ) => blink(l, seen , depth - 1) + blink(r, seen , depth - 1),
+    let stone_count = match process_stone(stone) {
+        Whoops::Single(s) => blink(s, seen, depth - 1),
+        Whoops::Double(l, r) => blink(l, seen, depth - 1) + blink(r, seen, depth - 1),
     };
 
     seen.insert((stone, depth), stone_count);

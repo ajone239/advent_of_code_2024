@@ -7,4 +7,5 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.93"
+itertools = "0.13.0"
 rstest = "0.18.2"

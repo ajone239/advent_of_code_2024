@@ -1,0 +1,21 @@
+AAAA
+BBCD
+BBCC
+EEEC
+
+ +----+
+ |AAAA|
+ +----+
++--+  +-+  +-+
+|BB|  |C++ |D|
+|BB|  |CC| +-+
++--+  ++C+
+ +---+ +-+
+ |EEE|
+ +---+
+
+A -> 4 sides
+B -> 4 sides
+C -> 6 sides
+D -> 4 sides
+E -> 4 sides

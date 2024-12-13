@@ -12,6 +12,10 @@ fn main() -> Result<()> {
     for line in stdin.lines() {
         let line = line?;
 
+        if line.is_empty() {
+            break;
+        }
+
         field.push(line.trim().chars().collect());
     }
 

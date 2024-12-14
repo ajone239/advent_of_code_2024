@@ -9,7 +9,6 @@ fn main() -> Result<()> {
     let mut machine_input: Vec<String> = vec![];
     let mut machines: Vec<Game> = vec![];
 
-    // parse
     for line in stdin.lines() {
         let line = line?;
 
@@ -23,14 +22,21 @@ fn main() -> Result<()> {
     }
     machines.push(Game::from_data(machine_input)?);
 
-    println!("{:#?}", machines);
+    let result: i32 = machines
+        .into_iter()
+        .map(|m| m.min_tokens_to_win())
+        .filter(|t| t.is_some())
+        .map(|t| t.unwrap())
+        .sum();
+
+    println!("{}", result);
 
     Ok(())
 }
 
 #[derive(Debug)]
 struct Button {
-    name: char,
+    _name: char,
     dx: i32,
     dy: i32,
 }
@@ -49,14 +55,18 @@ impl FromStr for Button {
         let dy: String = data[3].chars().skip(2).take_while(|c| *c != ',').collect();
         let dy = dy.parse()?;
 
-        Ok(Self { name, dx, dy })
+        Ok(Self {
+            _name: name,
+            dx,
+            dy,
+        })
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 struct Prize {
-    x: u32,
-    y: u32,
+    x: i32,
+    y: i32,
 }
 
 impl FromStr for Prize {
@@ -68,7 +78,7 @@ impl FromStr for Prize {
         let x: String = data[1].chars().skip(2).take_while(|c| *c != ',').collect();
         let x = x.parse()?;
 
-        let y: String = data[1].chars().skip(2).take_while(|c| *c != ',').collect();
+        let y: String = data[2].chars().skip(2).take_while(|c| *c != ',').collect();
         let y = y.parse()?;
 
         Ok(Self { x, y })
@@ -93,5 +103,38 @@ impl Game {
             b_button,
             prize,
         })
+    }
+
+    fn min_tokens_to_win(&self) -> Option<i32> {
+        let mut tokens = None;
+
+        for i in 0..200 {
+            let mut attempt_tokens = 0;
+            let mut attempt_at_prize = Prize { x: 0, y: 0 };
+
+            for j in 0..(i + 100) {
+                let (cost, dx, dy) = if j >= i {
+                    (1, self.b_button.dx, self.b_button.dy)
+                } else {
+                    (3, self.a_button.dx, self.a_button.dy)
+                };
+
+                attempt_tokens += cost;
+                attempt_at_prize.x += dx;
+                attempt_at_prize.y += dy;
+
+                if attempt_at_prize > self.prize {
+                    break;
+                }
+
+                if attempt_at_prize == self.prize {
+                    let t = tokens.take().unwrap_or(i32::MAX);
+                    tokens = Some(i32::min(t, attempt_tokens));
+                    break;
+                }
+            }
+        }
+
+        tokens
     }
 }

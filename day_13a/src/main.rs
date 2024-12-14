@@ -1,33 +1,34 @@
 use std::{io, str::FromStr};
 
 use anyhow::Result;
+use itertools::Itertools;
 
 fn main() -> Result<()> {
     let stdin = io::stdin();
 
     let mut machine_input: Vec<String> = vec![];
-    let mut machines: Vec<Vec<String>> = vec![];
+    let mut machines: Vec<Game> = vec![];
 
     // parse
     for line in stdin.lines() {
         let line = line?;
 
         if line.is_empty() {
-            machines.push(machine_input.clone());
+            machines.push(Game::from_data(machine_input.clone())?);
             machine_input.clear();
             continue;
         }
 
         machine_input.push(line)
     }
-    machines.push(machine_input.clone());
-    machine_input.clear();
+    machines.push(Game::from_data(machine_input)?);
 
     println!("{:#?}", machines);
 
     Ok(())
 }
 
+#[derive(Debug)]
 struct Button {
     name: char,
     dx: i32,
@@ -38,10 +39,21 @@ impl FromStr for Button {
     type Err = anyhow::Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        todo!()
+        let data = s.split_whitespace().collect_vec();
+
+        let name = data[1].chars().next().unwrap();
+
+        let dx: String = data[2].chars().skip(2).take_while(|c| *c != ',').collect();
+        let dx = dx.parse()?;
+
+        let dy: String = data[3].chars().skip(2).take_while(|c| *c != ',').collect();
+        let dy = dy.parse()?;
+
+        Ok(Self { name, dx, dy })
     }
 }
 
+#[derive(Debug)]
 struct Prize {
     x: u32,
     y: u32,
@@ -51,10 +63,19 @@ impl FromStr for Prize {
     type Err = anyhow::Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        todo!()
+        let data = s.split_whitespace().collect_vec();
+
+        let x: String = data[1].chars().skip(2).take_while(|c| *c != ',').collect();
+        let x = x.parse()?;
+
+        let y: String = data[1].chars().skip(2).take_while(|c| *c != ',').collect();
+        let y = y.parse()?;
+
+        Ok(Self { x, y })
     }
 }
 
+#[derive(Debug)]
 struct Game {
     a_button: Button,
     b_button: Button,

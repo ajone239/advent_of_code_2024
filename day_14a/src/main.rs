@@ -6,8 +6,8 @@ fn main() -> Result<()> {
     let stdin = io::stdin();
 
     let time = 100;
-    let height = 101;
-    let width = 103;
+    let height = 103;
+    let width = 101;
 
     let mut robots = vec![];
 

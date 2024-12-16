@@ -102,6 +102,7 @@ name = "day_14a"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "itertools",
  "rstest",
 ]
 

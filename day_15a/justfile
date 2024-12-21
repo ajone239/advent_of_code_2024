@@ -1,0 +1,13 @@
+build:
+  cargo build
+
+smaller: build
+  @cat ./smaller_input | ../target/debug/day_15a
+  @echo "Should be 2028"
+
+small: build
+  @cat ./small_input | ../target/debug/day_15a
+  @echo "Should be 10092"
+
+test: build
+  @cat ./input | ../target/debug/day_15a
